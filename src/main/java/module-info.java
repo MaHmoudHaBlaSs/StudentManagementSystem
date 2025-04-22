@@ -1,9 +1,9 @@
 module org.example.studentmanagementsystem {
     requires javafx.controls;
     requires javafx.fxml;
-    requires java.sql;
-    requires java.desktop;
     requires java.management;
+    requires com.fasterxml.jackson.databind;
+    requires java.sql;
 
 
     opens org.example.studentmanagementsystem to javafx.fxml;

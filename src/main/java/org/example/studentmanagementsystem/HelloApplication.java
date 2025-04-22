@@ -1,14 +1,20 @@
 package org.example.studentmanagementsystem;
 //package com.gradingsystem.view;
 
-import java.sql.*;
+import java.io.File;
+import java.nio.file.Files;
+
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import javafx.animation.PauseTransition;
 import javafx.application.Application;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.layout.*;
+import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.example.studentmanagementsystem.models.Student;
 import org.example.studentmanagementsystem.services.Algorithms;
 
@@ -22,11 +28,9 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.studentmanagementsystem.services.StudentRepo;
+import org.example.studentmanagementsystem.view.DashBoardView;
 
 import java.util.List;
 
@@ -36,6 +40,8 @@ public class HelloApplication extends Application {
     private Algorithms algorithms;
     private ObservableList<Student> studentObservableList;
     private TableView<Student> studentTable;
+    Label statusLabel;
+    BorderPane mainLayout;
 
     @Override
     public void start(Stage primaryStage) {
@@ -44,15 +50,14 @@ public class HelloApplication extends Application {
         algorithms = new Algorithms();
 
         // Create main layout
-        BorderPane mainLayout = new BorderPane();
+        mainLayout = new BorderPane();
 
         // Create top navigation bar
         HBox navigationBar = createNavigationBar();
         mainLayout.setTop(navigationBar);
 
         // Create student table view
-        VBox studentTableView = createStudentTableView();
-        mainLayout.setCenter(studentTableView);
+        showStudents();
 
         // Create scene and show stage
         Scene scene = new Scene(mainLayout, 900, 700);
@@ -63,7 +68,7 @@ public class HelloApplication extends Application {
         primaryStage.show();
 
         // Load students from database
-        loadStudents();
+
     }
 
     private HBox createNavigationBar() {
@@ -98,8 +103,8 @@ public class HelloApplication extends Application {
         titleLabel.getStyleClass().add("section-title");
 
         ComboBox<String> sortOptions = new ComboBox<>();
-        sortOptions.getItems().addAll("QuickSort", "Bubble Sort", "Merge Sort");
-        sortOptions.setValue("QuickSort");
+        sortOptions.getItems().addAll("By Name", "By Grade");
+        sortOptions.setValue("By Name");
         sortOptions.setOnAction(e -> sortStudents(sortOptions.getValue()));
 
         ComboBox<String> performanceFilter = new ComboBox<>();
@@ -111,8 +116,12 @@ public class HelloApplication extends Application {
         addStudentBtn.getStyleClass().add("action-button");
         addStudentBtn.setOnAction(e -> showAddStudentDialog());
 
+        Button importStudentsBtn = new Button("Import Data");
+        importStudentsBtn.getStyleClass().add("action-button");
+        importStudentsBtn.setOnAction(e -> showImportDataDialog());
+
         headerBox.getChildren().addAll(titleLabel, new Label("Sort:"), sortOptions,
-                new Label("Filter:"), performanceFilter, addStudentBtn);
+                new Label("Filter:"), performanceFilter, addStudentBtn, importStudentsBtn);
 
         // Create table view
         studentTable = new TableView<>();
@@ -162,9 +171,8 @@ public class HelloApplication extends Application {
 
         // Create status bar
         HBox statusBar = new HBox(10);
-        Label statusLabel = new Label("Total Students: 0");
-        Label averageGradeLabel = new Label("Average Grade: 0");
-        statusBar.getChildren().addAll(statusLabel, averageGradeLabel);
+        statusLabel = new Label("Total Students: 0");
+        statusBar.getChildren().addAll(statusLabel);
 
         container.getChildren().addAll(headerBox, studentTable, statusBar);
 
@@ -185,23 +193,20 @@ public class HelloApplication extends Application {
 
         List<Student> sortedStudents;
         List<Student> studentList = new ArrayList<>(studentObservableList);
-/*
+
         switch (sortMethod) {
-            case "QuickSort":
-                sortedStudents = algorithms.quickSort(studentList);
+            case "By Name":
+                sortedStudents = algorithms.sortByName(studentList, 0, studentList.size()-1);
                 break;
-            case "Bubble Sort":
-                sortedStudents = algorithms.bubbleSort(studentList);
-                break;
-            case "Merge Sort":
-                sortedStudents = algorithms.mergeSort(studentList);
+            case "By Grade":
+                sortedStudents = algorithms.sortByGrade(studentList, 0, studentList.size()-1);
                 break;
             default:
                 sortedStudents = studentList;
         }
 
         studentObservableList.setAll(sortedStudents);
-*/
+
     }
 
     private void filterByPerformance(String performance) {
@@ -223,8 +228,7 @@ public class HelloApplication extends Application {
     }
 
     private void updateStatistics() {
-        // This should be updated to show statistics based on current visible students
-        // You might want to call algorithms.getAverageGrade() and other statistical methods here
+        statusLabel.setText("Total Students: "+studentObservableList.size());
     }
 
     private void showAddStudentDialog() {
@@ -281,7 +285,6 @@ public class HelloApplication extends Application {
                     }
 
                     Student newStudent = new Student(id, name, grade);
-                    studentRepo.addStudent(newStudent);
 
                     // Performance will be set based on grade in the StudentRepo
                     return newStudent;
@@ -299,6 +302,177 @@ public class HelloApplication extends Application {
                 loadStudents();
             }
         });
+    }
+    private void showImportDataDialog() {
+        // Create a new dialog
+        Stage dialogStage = new Stage();
+        dialogStage.setTitle("Import Student Data");
+        dialogStage.initModality(Modality.APPLICATION_MODAL);
+        dialogStage.setResizable(false);
+
+        // Create layout
+        VBox dialogLayout = new VBox(15);
+        dialogLayout.setPadding(new Insets(20));
+        dialogLayout.setAlignment(Pos.CENTER);
+        dialogLayout.getStyleClass().add("import-dialog");
+
+        // Create title
+        Label titleLabel = new Label("Import Student Data from JSON");
+        titleLabel.getStyleClass().add("dialog-title");
+
+        // File path field
+        HBox filePathBox = new HBox(10);
+        filePathBox.setAlignment(Pos.CENTER);
+
+        TextField filePathField = new TextField();
+        filePathField.setPromptText("No file selected");
+        filePathField.setPrefWidth(300);
+        filePathField.setEditable(false);
+
+        Button browseButton = new Button("Browse");
+        browseButton.getStyleClass().add("primary-button");
+
+        filePathBox.getChildren().addAll(filePathField, browseButton);
+
+        // Instructions
+        Label instructionsLabel = new Label("Please select a JSON file containing student data to import.");
+        instructionsLabel.getStyleClass().add("dialog-instructions");
+        instructionsLabel.setWrapText(true);
+
+        // Status label for feedback
+        Label statusLabel = new Label("");
+        statusLabel.getStyleClass().add("status-label");
+
+        // Action buttons
+        HBox actionButtons = new HBox(10);
+        actionButtons.setAlignment(Pos.CENTER_RIGHT);
+
+        Button importButton = new Button("Import");
+        importButton.getStyleClass().add("primary-button");
+        importButton.setDisable(true);
+
+        Button cancelButton = new Button("Cancel");
+        cancelButton.getStyleClass().add("secondary-button");
+
+        actionButtons.getChildren().addAll(cancelButton, importButton);
+
+        // Add all components to dialog layout
+        dialogLayout.getChildren().addAll(
+                titleLabel,
+                instructionsLabel,
+                filePathBox,
+                statusLabel,
+                actionButtons
+        );
+
+        // Set up file chooser
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Select JSON File");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("JSON Files", "*.json")
+        );
+
+        // Browse button action
+        browseButton.setOnAction(e -> {
+            File selectedFile = fileChooser.showOpenDialog(dialogStage);
+            if (selectedFile != null) {
+                filePathField.setText(selectedFile.getAbsolutePath());
+                importButton.setDisable(false);
+                statusLabel.setText("");
+            }
+        });
+
+        // Import button action
+        importButton.setOnAction(e -> {
+            try {
+                String filePath = filePathField.getText();
+                File jsonFile = new File(filePath);
+
+                // Read and parse JSON file
+                String jsonContent = new String(Files.readAllBytes(jsonFile.toPath()));
+
+                // Use a more robust JSON library like Gson or Jackson in production
+                // This is a simplified example using JsonParser from javax.json
+                importStudentsFromJson(jsonContent);
+
+                statusLabel.setText("Data imported successfully!");
+                statusLabel.getStyleClass().removeAll("error-text");
+                statusLabel.getStyleClass().add("success-text");
+
+                // Close dialog after short delay
+                PauseTransition delay = new PauseTransition(Duration.seconds(1.5));
+                delay.setOnFinished(event -> dialogStage.close());
+                delay.play();
+
+            } catch (IOException ex) {
+                statusLabel.setText("Error reading file: " + ex.getMessage());
+                statusLabel.getStyleClass().removeAll("success-text");
+                statusLabel.getStyleClass().add("error-text");
+            } catch (Exception ex) {
+                statusLabel.setText("Error importing data: " + ex.getMessage());
+                statusLabel.getStyleClass().removeAll("success-text");
+                statusLabel.getStyleClass().add("error-text");
+            }
+        });
+
+        // Cancel button action
+        cancelButton.setOnAction(e -> dialogStage.close());
+
+        // Create scene and show dialog
+        Scene dialogScene = new Scene(dialogLayout);
+        dialogScene.getStylesheets().add(getClass().getResource("/main.css").toExternalForm());
+
+        dialogStage.setScene(dialogScene);
+        dialogStage.showAndWait();
+    }
+
+    // Helper method to import students from JSON
+
+    private void importStudentsFromJson(String jsonContent) {
+        try {
+            // Use Jackson for parsing the basic JSON structure
+            ObjectMapper mapper = new ObjectMapper();
+
+            // First parse as generic list of maps
+            List<Map<String, Object>> studentMaps = mapper.readValue(
+                    jsonContent,
+                    mapper.getTypeFactory().constructCollectionType(List.class, Map.class)
+            );
+
+            List<Student> importedStudents = new ArrayList<>();
+
+            // Then manually construct Student objects from the parsed data
+            for (Map<String, Object> studentMap : studentMaps) {
+                String id = (String) studentMap.get("id");
+                String name = (String) studentMap.get("name");
+
+                // Handle grade which could be Integer or Double in JSON
+                double grade;
+                Object gradeObj = studentMap.get("grade");
+                if (gradeObj instanceof Integer) {
+                    grade = ((Integer) gradeObj).doubleValue();
+                } else {
+                    grade = ((Number) gradeObj).doubleValue();
+                }
+
+                // Create student and calculate performance
+                Student student = new Student(id, name, grade);
+                student.calculatePerformance();
+                importedStudents.add(student);
+            }
+
+            // Add imported students to repository
+            for (Student student : importedStudents) {
+                studentRepo.addStudent(student);
+            }
+
+            loadStudents();
+            System.out.println("Successfully imported " + importedStudents.size() + " students");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to parse JSON data: " + e.getMessage(), e);
+        }
     }
 
     private void showEditStudentDialog(Student student) {
@@ -332,7 +506,7 @@ public class HelloApplication extends Application {
             if (dialogButton == saveButtonType) {
                 try {
                     String name = nameField.getText();
-                    int grade = Integer.parseInt(gradeField.getText());
+                    double grade = Double.parseDouble(gradeField.getText());
 
                     if (name.isEmpty()) {
                         showAlert("Name cannot be empty");
@@ -344,9 +518,10 @@ public class HelloApplication extends Application {
                         return null;
                     }
 
-                    Student updatedStudent = new Student(student.getId(), name, grade);
-                    // Performance will be updated in the StudentRepo
-                    return updatedStudent;
+                    student.setName(name);
+                    student.setGrade(grade);
+                    studentRepo.editStudent(student);
+                    return student;
                 } catch (NumberFormatException e) {
                     showAlert("Grade must be a number");
                     return null;
@@ -363,7 +538,7 @@ public class HelloApplication extends Application {
             if (result != null) {
                 if (result.isMarkedForDeletion()) {
                     // Delete the student
-                    //studentRepo.deleteStudent(student.getId());
+                    studentRepo.deleteStudent(student);
                 } else {
                     // Update the student
                     //studentRepo.updateStudent(result);
@@ -383,34 +558,35 @@ public class HelloApplication extends Application {
 
     private void showDashboard() {
         // TODO: Implement dashboard view
-        System.out.println("Dashboard view not yet implemented");
+        DashBoardView dashBoard = new DashBoardView(studentRepo, algorithms);
+        VBox dashBoardView = dashBoard.getDashBoard();
+        mainLayout.setCenter(dashBoardView);
     }
 
     private void showStudents() {
         // Already showing students, no need to do anything
+        VBox studentTableView = createStudentTableView();
+        mainLayout.setCenter(studentTableView);
+        loadStudents();
     }
 
     private void showAnalytics() {
-        // Create and show analytics window
-        Stage analyticsStage = new Stage();
-        analyticsStage.setTitle("Student Analytics");
 
         VBox analyticsLayout = createAnalyticsView();
-        Scene analyticsScene = new Scene(analyticsLayout, 800, 600);
-
-        analyticsStage.setScene(analyticsScene);
-        analyticsStage.show();
+        mainLayout.setCenter(analyticsLayout);
     }
 
     private VBox createAnalyticsView() {
         VBox container = new VBox(20);
         container.setPadding(new Insets(20));
+        container.getStyleClass().add("analytics-container");
 
-        Label titleLabel = new Label("Grade Analytics");
-        titleLabel.getStyleClass().add("section-title");
+        // Statistics section
+        Label statsTitle = new Label("Grade Analytics");
+        statsTitle.getStyleClass().add("section-title");
 
-        // Add statistics sections
         VBox statsBox = new VBox(10);
+        statsBox.getStyleClass().add("stats-box");
         List<Student> students = studentRepo.getAllStudents();
 
         double[] stats = algorithms.getStatistics(students, false);
@@ -419,17 +595,24 @@ public class HelloApplication extends Application {
         double lowestGrade = stats[3];
         double medianGrade = stats[0];
 
-        statsBox.getChildren().addAll(
-                new Label("Average Grade: " + String.format("%.2f", averageGrade)),
-                new Label("Highest Grade: " + highestGrade),
-                new Label("Lowest Grade: " + lowestGrade),
-                new Label("Median Grade: " + String.format("%.2f", medianGrade))
-        );
+        Label avgLabel = new Label("Average Grade: " + String.format("%.2f", averageGrade));
+        Label highLabel = new Label("Highest Grade: " + highestGrade);
+        Label lowLabel = new Label("Lowest Grade: " + lowestGrade);
+        Label medianLabel = new Label("Median Grade: " + String.format("%.2f", medianGrade));
 
-        // Create performance distribution
-        VBox distributionBox = new VBox(10);
-        Label distributionLabel = new Label("Performance Distribution");
-        distributionLabel.getStyleClass().add("subsection-title");
+        avgLabel.getStyleClass().add("stat-label");
+        highLabel.getStyleClass().add("stat-label");
+        lowLabel.getStyleClass().add("stat-label");
+        medianLabel.getStyleClass().add("stat-label");
+
+        statsBox.getChildren().addAll(avgLabel, highLabel, lowLabel, medianLabel);
+
+        // Performance distribution section
+        Label perfTitle = new Label("Performance Analysis");
+        perfTitle.getStyleClass().add("section-title");
+
+        VBox distributionBox = new VBox(15);
+        distributionBox.getStyleClass().add("distribution-box");
 
         int excellentCount = 0, veryGoodCount = 0, goodCount = 0, averageCount = 0, belowAverageCount = 0;
 
@@ -453,18 +636,63 @@ public class HelloApplication extends Application {
             }
         }
 
+        int totalStudents = students.size();
+        double excellentPercentage = totalStudents > 0 ? (excellentCount * 100.0 / totalStudents) : 0;
+        double veryGoodPercentage = totalStudents > 0 ? (veryGoodCount * 100.0 / totalStudents) : 0;
+        double goodPercentage = totalStudents > 0 ? (goodCount * 100.0 / totalStudents) : 0;
+        double averagePercentage = totalStudents > 0 ? (averageCount * 100.0 / totalStudents) : 0;
+        double belowAveragePercentage = totalStudents > 0 ? (belowAverageCount * 100.0 / totalStudents) : 0;
+
+        // Create performance bars
+        HBox excellentRow = createPerformanceRow("Excellent (90-100)", excellentPercentage, "excellent-bar");
+        HBox veryGoodRow = createPerformanceRow("Very Good (80-89)", veryGoodPercentage, "very-good-bar");
+        HBox goodRow = createPerformanceRow("Good (70-79)", goodPercentage, "good-bar");
+        HBox averageRow = createPerformanceRow("Average (60-69)", averagePercentage, "average-bar");
+        HBox belowAverageRow = createPerformanceRow("Below Average (0-59)", belowAveragePercentage, "below-average-bar");
+
         distributionBox.getChildren().addAll(
-                distributionLabel,
-                new Label("Excellent: " + excellentCount + " students"),
-                new Label("Very Good: " + veryGoodCount + " students"),
-                new Label("Good: " + goodCount + " students"),
-                new Label("Average: " + averageCount + " students"),
-                new Label("Below Average: " + belowAverageCount + " students")
+                excellentRow,
+                veryGoodRow,
+                goodRow,
+                averageRow,
+                belowAverageRow
         );
 
-        container.getChildren().addAll(titleLabel, statsBox, distributionBox);
+        container.getChildren().addAll(statsTitle, statsBox, perfTitle, distributionBox);
 
         return container;
+    }
+
+    private HBox createPerformanceRow(String label, double percentage, String barStyleClass) {
+        HBox row = new HBox(5);
+        row.setAlignment(Pos.CENTER_LEFT);
+
+        Label categoryLabel = new Label(label);
+        categoryLabel.setPrefWidth(150);
+        categoryLabel.getStyleClass().add("category-label");
+
+        StackPane barContainer = new StackPane();
+        barContainer.setPrefWidth(400);
+        barContainer.setMaxWidth(400);
+        barContainer.getStyleClass().add("bar-background");
+
+        StackPane bar = new StackPane();
+        bar.setPrefHeight(20);
+        bar.setPrefWidth(percentage * 4); // Scale to fit container (400px * percentage/100)
+        bar.setMaxWidth(percentage * 4);
+        bar.getStyleClass().add(barStyleClass);
+        bar.setAlignment(Pos.CENTER_LEFT);
+
+        barContainer.getChildren().add(bar);
+        barContainer.setAlignment(Pos.CENTER_LEFT);
+
+        Label percentLabel = new Label(String.format("%.0f%%", percentage));
+        percentLabel.getStyleClass().add("percent-label");
+        //HBox.setHgrow(Region.USE_PREF_SIZE, barContainer);
+
+        row.getChildren().addAll(categoryLabel, barContainer, percentLabel);
+
+        return row;
     }
 
     public static void main(String[] args) {

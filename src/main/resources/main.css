@@ -157,3 +157,344 @@
     -fx-border-radius: 4px;
     -fx-spacing: 10px;
 }
+
+/* Main container styling */
+.analytics-container {
+    -fx-background-color: white;
+    -fx-padding: 15px;
+}
+
+/* Title styling */
+.section-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+    -fx-padding: 0 0 10 0;
+}
+
+/* Statistics section styling */
+.stats-box {
+    -fx-background-color: #f8f9fa;
+    -fx-background-radius: 8px;
+    -fx-padding: 15px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 3);
+    -fx-margin-bottom: 20px;
+}
+
+.stat-label {
+    -fx-font-size: 16px;
+    -fx-font-weight: normal;
+    -fx-text-fill: #2c3e50;
+    -fx-padding: 3px;
+}
+
+/* Distribution section styling */
+.distribution-box {
+    -fx-spacing: 15px;
+    -fx-padding: 0 0 10 0;
+}
+
+/* Category labels */
+.category-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #2c3e50;
+}
+
+/* Percentage labels */
+.percent-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 0 10;
+}
+
+/* Progress bar background */
+.bar-background {
+    -fx-background-color: #e6e6e6;
+    -fx-background-radius: 4px;
+}
+
+/* Performance bar styles */
+.excellent-bar {
+    -fx-background-color: #27ae60;
+    -fx-background-radius: 4px;
+}
+
+.very-good-bar {
+    -fx-background-color: #3498db;
+    -fx-background-radius: 4px;
+}
+
+.good-bar {
+    -fx-background-color: #f1c40f;
+    -fx-background-radius: 4px;
+}
+
+.average-bar {
+    -fx-background-color: #e67e22;
+    -fx-background-radius: 4px;
+}
+
+.below-average-bar {
+    -fx-background-color: #e74c3c;
+    -fx-background-radius: 4px;
+}
+/* Main styling */
+* {
+    -fx-font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+/* Dashboard layout */
+.root {
+    -fx-background-color: #f5f7fa;
+}
+
+/* Title styling */
+.section-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+    -fx-padding: 0 0 10 0;
+}
+
+.subsection-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #34495e;
+    -fx-padding: 5 0 5 0;
+}
+
+/* Summary cards styling */
+.summary-card {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 8, 0, 0, 4);
+    -fx-alignment: center;
+    -fx-min-width: 200px;
+}
+
+.card-title {
+    -fx-font-size: 14px;
+    -fx-text-fill: #7f8c8d;
+}
+
+.card-value {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+}
+
+/* Card color variations */
+.students-card {
+    -fx-border-color: #3498db;
+    -fx-border-width: 0 0 4 0;
+}
+
+.students-card .card-value {
+    -fx-text-fill: #3498db;
+}
+
+.average-card {
+    -fx-border-color: #2ecc71;
+    -fx-border-width: 0 0 4 0;
+}
+
+.average-card .card-value {
+    -fx-text-fill: #2ecc71;
+}
+
+.highest-card {
+    -fx-border-color: #9b59b6;
+    -fx-border-width: 0 0 4 0;
+}
+
+.highest-card .card-value {
+    -fx-text-fill: #9b59b6;
+}
+
+.excellent-card {
+    -fx-border-color: #f1c40f;
+    -fx-border-width: 0 0 4 0;
+}
+
+.excellent-card .card-value {
+    -fx-text-fill: #f1c40f;
+}
+
+/* Chart container */
+.chart-container {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-padding: 15px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 8, 0, 0, 4);
+}
+
+/* Bar chart styling */
+.chart {
+    -fx-padding: 10px;
+}
+
+.chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.chart-vertical-grid-lines {
+    -fx-stroke: #ecf0f1;
+}
+
+.chart-horizontal-grid-lines {
+    -fx-stroke: #ecf0f1;
+}
+
+.chart-alternative-row-fill {
+    -fx-fill: transparent;
+    -fx-stroke: transparent;
+}
+
+.chart-series-line {
+    -fx-stroke-width: 2px;
+}
+
+.default-color0.chart-bar { /* First series color */
+    -fx-bar-fill: #3498db;
+}
+
+.chart-bar.data0 { -fx-bar-fill: #27ae60; } /* 90-100 */
+.chart-bar.data1 { -fx-bar-fill: #3498db; } /* 80-89 */
+.chart-bar.data2 { -fx-bar-fill: #f1c40f; } /* 70-79 */
+.chart-bar.data3 { -fx-bar-fill: #e67e22; } /* 60-69 */
+.chart-bar.data4 { -fx-bar-fill: #e74c3c; } /* 0-59 */
+
+/* Recent performance section */
+.recent-performance {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-padding: 15px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 8, 0, 0, 4);
+}
+
+/* Analytics view styling */
+.analytics-container {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-padding: 15px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 8, 0, 0, 4);
+}
+
+.stats-box {
+    -fx-background-color: #f8f9fa;
+    -fx-background-radius: 8px;
+    -fx-padding: 15px;
+    -fx-margin-bottom: 20px;
+}
+
+.stat-label {
+    -fx-font-size: 16px;
+    -fx-text-fill: #2c3e50;
+    -fx-padding: 3px;
+}
+
+.distribution-box {
+    -fx-spacing: 15px;
+    -fx-padding: 0 0 10 0;
+}
+
+.category-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #2c3e50;
+}
+
+.percent-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 0 10;
+}
+
+.bar-background {
+    -fx-background-color: #e6e6e6;
+    -fx-background-radius: 4px;
+}
+
+.excellent-bar {
+    -fx-background-color: #27ae60;
+    -fx-background-radius: 4px;
+}
+
+.very-good-bar {
+    -fx-background-color: #3498db;
+    -fx-background-radius: 4px;
+}
+
+.good-bar {
+    -fx-background-color: #f1c40f;
+    -fx-background-radius: 4px;
+}
+
+.average-bar {
+    -fx-background-color: #e67e22;
+    -fx-background-radius: 4px;
+}
+
+.below-average-bar {
+    -fx-background-color: #e74c3c;
+    -fx-background-radius: 4px;
+}
+/* Import Dialog Styling */
+.import-dialog {
+    -fx-background-color: white;
+}
+
+.dialog-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+.dialog-instructions {
+    -fx-font-size: 14px;
+    -fx-text-fill: #7f8c8d;
+}
+
+.status-label {
+    -fx-font-size: 14px;
+    -fx-padding: 5px;
+    -fx-min-height: 25px;
+}
+
+.success-text {
+    -fx-text-fill: #27ae60;
+    -fx-font-weight: bold;
+}
+
+.error-text {
+    -fx-text-fill: #e74c3c;
+    -fx-font-weight: bold;
+}
+
+.primary-button {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8 15 8 15;
+    -fx-background-radius: 4px;
+}
+
+.primary-button:hover {
+    -fx-background-color: #2980b9;
+}
+
+.primary-button:disabled {
+    -fx-background-color: #bdc3c7;
+    -fx-text-fill: #7f8c8d;
+}
+
+.secondary-button {
+    -fx-background-color: #ecf0f1;
+    -fx-text-fill: #2c3e50;
+    -fx-padding: 8 15 8 15;
+    -fx-background-radius: 4px;
+}
+
+.secondary-button:hover {
+    -fx-background-color: #bdc3c7;
+}

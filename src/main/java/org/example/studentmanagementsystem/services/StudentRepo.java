@@ -44,6 +44,29 @@ public class StudentRepo {
             ex.printStackTrace();
         }
     }
+    public void editStudent(Student std){
+        String query = "Update students SET name = ?, grade = ?  WHERE id = ?";
 
+        try (Connection cn = DbConnector.getConnection(); PreparedStatement pds = cn.prepareStatement(query)){
+            pds.setString(1, std.getName());
+            pds.setDouble(2, std.getGrade());
+            pds.setString(3, std.getId());
 
+            pds.executeUpdate();
+        } catch (SQLException ex){
+            ex.printStackTrace();
+        }
+
+    }
+    public void deleteStudent(Student std){
+        String query = "DELETE FROM students WHERE id = ?";
+
+        try (Connection cn = DbConnector.getConnection(); PreparedStatement pds = cn.prepareStatement(query)){
+            pds.setString(1, std.getId());
+
+            pds.executeUpdate();
+        } catch (SQLException ex){
+            ex.printStackTrace();
+        }
+    }
 }

@@ -2,9 +2,9 @@ package org.example.studentmanagementsystem.models;
 import javafx.beans.property.*;
 
 public class Student {
-    private final StringProperty id;
-    private final StringProperty name;
-    private final DoubleProperty grade;
+    private StringProperty id;
+    private StringProperty name;
+    private DoubleProperty grade;
     private StringProperty performance;
     private boolean markedForDeletion;
 
@@ -49,6 +49,12 @@ public class Student {
 
     public void setPerformance(String performance) {
         this.performance.set(performance);
+    }
+    public void setGrade(double grade){
+        this.grade = new SimpleDoubleProperty(grade);
+    }
+    public void setName(String name){
+        this.name = new SimpleStringProperty(name);
     }
 
     public StringProperty performanceProperty() {

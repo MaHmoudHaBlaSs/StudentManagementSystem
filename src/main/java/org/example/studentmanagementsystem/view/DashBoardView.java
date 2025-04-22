@@ -7,10 +7,7 @@ import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import org.example.studentmanagementsystem.models.Student;
 import org.example.studentmanagementsystem.services.Algorithms;
@@ -27,9 +24,7 @@ public class DashBoardView {
         this.algorithms = algorithms;
     }
 
-    public void show() {
-        Stage dashboardStage = new Stage();
-        dashboardStage.setTitle("Grade System Dashboard");
+    public VBox getDashBoard() {
 
         VBox mainLayout = new VBox(20);
         mainLayout.setPadding(new Insets(20));
@@ -49,11 +44,7 @@ public class DashBoardView {
 
         mainLayout.getChildren().addAll(titleLabel, summaryCards, chartContainer, recentPerformance);
 
-        Scene scene = new Scene(mainLayout, 900, 700);
-        scene.getStylesheets().add(getClass().getResource("/styles/main.css").toExternalForm());
-
-        dashboardStage.setScene(scene);
-        dashboardStage.show();
+        return mainLayout;
     }
 
     private HBox createSummaryCards() {
