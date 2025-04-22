@@ -4,6 +4,7 @@ module org.example.studentmanagementsystem {
     requires java.management;
     requires com.fasterxml.jackson.databind;
     requires java.sql;
+    requires com.github.librepdf.openpdf;
 
 
     opens org.example.studentmanagementsystem to javafx.fxml;

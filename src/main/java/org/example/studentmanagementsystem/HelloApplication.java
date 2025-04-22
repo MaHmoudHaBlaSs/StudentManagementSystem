@@ -42,10 +42,12 @@ public class HelloApplication extends Application {
     private TableView<Student> studentTable;
     Label statusLabel;
     BorderPane mainLayout;
+    Stage stage;
 
     @Override
     public void start(Stage primaryStage) {
         // Initialize services
+        this.stage = primaryStage;
         studentRepo = new StudentRepo();
         algorithms = new Algorithms();
 
@@ -68,7 +70,6 @@ public class HelloApplication extends Application {
         primaryStage.show();
 
         // Load students from database
-
     }
 
     private HBox createNavigationBar() {
@@ -559,7 +560,7 @@ public class HelloApplication extends Application {
     private void showDashboard() {
         // TODO: Implement dashboard view
         DashBoardView dashBoard = new DashBoardView(studentRepo, algorithms);
-        VBox dashBoardView = dashBoard.getDashBoard();
+        VBox dashBoardView = dashBoard.getDashBoard(stage);
         mainLayout.setCenter(dashBoardView);
     }
 
